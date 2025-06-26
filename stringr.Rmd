@@ -1,0 +1,327 @@
+---
+title: "STRINGR"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+## stringr
+### Sumário
+
+- **Manipulação de texto básica**
+  - `str_length()`
+  - `str_count()`
+  - `str_to_upper()`, `str_to_lower()`, `str_to_title()`
+  - `str_sub()`
+  - `str_trim()`
+  - `str_pad()`
+  - `str_c()`
+  - `str_dup()`
+
+- **Expressões regulares e padrões**
+  - Símbolos e padrões básicos
+  - `str_detect()`
+  - `str_starts()`, `str_ends()`
+  - `str_subset()`
+  - `str_extract()`, `str_extract_all()`
+  - `str_match()`
+  - `str_replace()`, `str_replace_all()`
+
+- **Trabalhando com separação e localização**
+  - `str_split()`, `str_split_fixed()`
+  - `str_locate()`, `str_locate_all()`
+
+
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(stringr)
+```
+
+###  O pacote stringr
+
+O pacote `stringr`, parte do tidyverse, oferece uma maneira consistente e intuitiva de manipular strings no R. Ele simplifica tarefas comuns como contar caracteres, extrair partes de uma string, realizar substituições, aplicar expressões regulares, entre outras.
+
+Vamos conhecer as principais funções do pacote `stringr`, com exemplos práticos.
+
+### `str_length()`
+Retorna o número de caracteres de cada string.
+
+```{r}
+str_length("stringr")
+```
+
+```{r exemplo_1}
+# Qual o comprimento das strings "São Paulo", "Rio de Janeiro","Rio Grande do Norte", "Acre", Minas Gerais?
+
+str_length(c("São Paulo", "Rio de Janeiro","Rio Grande do Norte", "Acre", "Minas Gerais"))
+
+```
+
+
+### `str_count()`
+Conta quantas vezes um padrão aparece em cada string.
+
+```{r}
+str_count("banana", "a")
+```
+
+```{r exemplo_2}
+# Conte quantas vezes "r" aparece em "observatório de dados"
+
+str_count("observatório de dados", "r")
+
+```
+
+
+
+### `str_to_upper, str_to_lower, str_to_title`
+Converte as strings para letras maiúsculas, minúsculas ou para o formato título (primeira letra de cada palavra em maiúscula).
+
+
+```{r exemplo_3}
+s <- "Observatórios de dados"
+str_to_lower(s)
+
+str_to_upper(s)
+
+str_to_title(s)
+
+```
+
+
+
+### `str_sub()`
+Extrai ou substitui partes de uma string.
+
+```{r}
+str_sub("programar", 1, 4)
+```
+
+```{r exemplo_4}
+s <- c("01-Feminino", "02-Masculino", "03-Indefinido")
+
+
+str_sub(s, start = 4)
+s <- c("Feminino-01", "Masculino-02", "Indefinido-03")
+
+str_sub(s, end = -4) 
+
+str_sub(s, start = -2)
+
+s <- c("__SP__", "__MG__", "__RJ__")
+str_sub(s, 3, 4)
+
+```
+
+### `str_trim()`
+Remove espaços em branco extras do início ou fim da string.
+
+```{r exemplo_5}
+s <- c("M", "F", "F", " M", " F ", "M")
+
+as.factor(s)
+
+string_aparada <- str_trim(s)
+
+as.factor(string_aparada)
+```
+
+### `str_pad()`
+Preenche a string para atingir um certo comprimento.
+
+```{r exemplo_6}
+str_pad("R", 5, side = "both", pad = "*")
+
+str_pad("R", 5, side = "right", pad = "a")
+```
+
+---
+
+### `str_c()`
+Concatena strings.
+
+```{r}
+str_c("Olá", "mundo", sep = ", ")
+```
+
+```{r exemplo_7}
+string1 <- "Brigadeiro"
+string2 <- "bom"
+string3 <- "melhor"
+
+str_c(string1, " é a prova de que não existe nada tão ", string2,
+      " que não possa ficar ", string3, ".")
+
+
+string1 <- c("Brigadeiro", "A política brasileira")
+string2 <- c("bom", "ruim")
+string3 <- c("melhor", "pior")
+
+str_c(string1, " é a prova de que não existe nada tão ", string2,
+      " que não possa ficar ", string3, ".")
+```
+
+
+### `str_dup()`
+Repete a string n vezes.
+
+```{r}
+str_dup("ha", 3)
+```
+
+---
+
+### Símbolos básicos de expressões regulares
+
+Expressões regulares (ou regex) utilizam símbolos especiais para identificar padrões em textos. Abaixo estão alguns dos símbolos mais comuns e seus significados:
+
+| Símbolo   | Significado                                                    |
+|-----------|----------------------------------------------------------------|
+| `^`       | Início da string (começa com...)                               |
+| `$`       | Fim da string (termina com...)                                 |
+| `.`       | Qualquer caractere (exceto quebra de linha)                    |
+| `[...]`   | Qualquer caractere listado entre colchetes                     |
+| `[^...]`  | Qualquer caractere **exceto** os listados entre colchetes      |
+| `+`       | Uma ou mais vezes                                              |
+| `*`       | Zero ou mais vezes                                             |
+| `{x}`     | Exatamente x repetições                                        |
+| `{x,y}`   | Entre x e y repetições                                         |
+| `?`       | Zero ou uma vez (torna o caractere anterior opcional)         |
+
+Você pode combinar esses símbolos para formar padrões mais complexos, como por exemplo:
+
+- `^ban`: strings que começam com "ban"
+- `ban$`: strings que terminam com "ban"
+- `b ?an`: reconhece "ban" ou "b an"
+- `[Cc]asa`: reconhece "casa" ou "Casa"
+- `[0-9]`: qualquer número de 0 a 9
+- `[[:space:]]+`: um ou mais espaços
+
+A tabela abaixo mostra o resultado da aplicação de diferentes padrões de regex sobre várias strings. O valor retornado é `TRUE` se a regex encontrar o padrão na string, e `FALSE` caso contrário.
+
+| String             | `^ban` | `b ?an` | `ban` | `BAN` | `ban$` |
+|--------------------|--------|---------|-------|-------|--------|
+| abandonado         | FALSE  | TRUE    | TRUE  | FALSE | FALSE  |
+| ban                | TRUE   | TRUE    | TRUE  | FALSE | TRUE   |
+| banana             | TRUE   | TRUE    | TRUE  | FALSE | FALSE  |
+| BANANA             | FALSE  | FALSE   | FALSE | TRUE  | FALSE  |
+| ele levou ban      | FALSE  | TRUE    | TRUE  | FALSE | TRUE   |
+| pranab anderson    | FALSE  | TRUE    | FALSE | FALSE | FALSE  |
+
+
+
+### `str_detect()`
+Retorna TRUE/FALSE se o padrão aparece na string.
+
+```{r}
+str_detect("cadeira", "e")
+
+str_detect("Minas Gerais", pattern = "Gerais$")
+
+str_detect("sao paulo sp", pattern = "paulo$")
+
+```
+
+### `str_starts()` / `str_ends()`
+Testa se a string começa ou termina com determinado padrão.
+
+```{r}
+str_starts("cadeira", "ca")
+str_ends("cadeira", "ra")
+```
+
+### `str_subset()`
+Filtra apenas strings que contêm o padrão.
+
+```{r}
+frases <- c('a roupa do rei', 'de roma', 'o rato roeu')
+str_subset(frases, 'd[eo]')
+```
+
+---
+
+### `str_extract()` / `str_extract_all()`
+Extrai correspondências com base em padrões.
+
+```{r}
+r_core_group <- c(
+  'Douglas Bates', 'John Chambers', 'Peter Dalgaard',
+  'Robert Gentleman', 'Kurt Hornik', 'Ross Ihaka', 'Tomas Kalibera',
+  'Michael Lawrence', 'Friedrich Leisch', 'Uwe Ligges', '...'
+)
+
+sobrenomes <- str_extract(r_core_group, '[:alpha:]+$')
+sobrenomes
+```
+
+### `str_match()`
+Extrai grupos de captura com expressões regulares.
+
+```{r}
+str_match("Item: 45", "(\\w+): (\\d+)")
+```
+
+
+
+### `str_replace()` / `str_replace_all()`
+Substitui a primeira ou todas as ocorrências do padrão.
+
+```{r}
+str_replace("maçã verde", "verde", "vermelha")
+```
+
+```{r exemplo_8}
+cidades <- c("S. José do Rio Preto", "São Paulo", "S. José dos Campos", "São Roque", "S. S. da Grama")
+
+str_replace(cidades, "S[.]", "São")
+
+cidades <- c("S. José do Rio Preto", "São Paulo", "S. José dos Campos", "São Roque", "S. S. da Grama")
+
+str_replace(cidades, "S.", "São")
+
+cidades <- c("S. José do Rio Preto", "São Paulo", "S. José dos Campos", "São Roque", "S. S. da Grama")
+
+str_replace(cidades, fixed("S."), "São")
+
+
+```
+### A função `str_replace()` substitui apenas a primeira ocorrência encontrada. No exemplo anterior, apenas o primeiro “S.” era substituído por “São”. Se quisermos substituir todas as ocorrências de um padrão dentro de uma string, utilizamos a função `str_replace_all()`.
+
+
+```{r exemplo_9}
+cpf <- c("303.030.111-33", "102-177-011-20", "987.220.199.00")
+
+str_replace_all(cpf, "[.-]", " ")
+
+
+
+```
+
+---
+
+### `str_split()`
+Divide uma string por um separador.
+
+```{r}
+texto <- 'Durante um longo período de tempo o "R" foi escrito "P" como no alfabeto cirílico. O seu nome no alfabeto fenício era "rech". Seu significado era o de uma cabeça, representada pela adaptação do hieróglifo egípcio de uma cabeça. Transformou-se no "rô" dos gregos. Os romanos modificaram o rô acrescentando um pequeno traço para diferenciá-lo do no nosso P.'
+
+str_split(texto, fixed('.'))
+```
+
+### `str_split_fixed()`
+Mesma ideia, mas retorna matriz com número fixo de colunas.
+
+```{r}
+str_split_fixed(texto, fixed('.'), 3)
+```
+
+
+### `str_locate()` / `str_locate_all()`
+Retorna posições de início e fim de padrões.
+
+```{r}
+str_locate("exemplo", "em")
+```
+
+
